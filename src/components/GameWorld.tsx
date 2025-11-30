@@ -110,86 +110,66 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
       ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
 
       buildings.forEach(building => {
-        ctx.fillStyle = building.color;
-        ctx.globalAlpha = 0.3;
-        ctx.fillRect(building.x, building.y, building.width, building.height);
-        ctx.globalAlpha = 1;
-
-        ctx.strokeStyle = building.color;
-        ctx.lineWidth = 3;
-        ctx.strokeRect(building.x, building.y, building.width, building.height);
-
-        ctx.fillStyle = '#1a1f2c';
-        ctx.fillRect(building.x, building.y + building.height - 8, building.width, 8);
-        ctx.strokeStyle = building.color;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(building.x, building.y + building.height - 8, building.width, 8);
-
-        ctx.fillStyle = building.color;
-        ctx.globalAlpha = 0.5;
-        ctx.beginPath();
-        ctx.moveTo(building.x - 6, building.y);
-        ctx.lineTo(building.x + building.width / 2, building.y - 12);
-        ctx.lineTo(building.x + building.width + 6, building.y);
-        ctx.closePath();
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        ctx.stroke();
-
-        const doorWidth = 16;
-        const doorHeight = 24;
+        const wallThickness = 3;
+        const floorHeight = building.height / building.floors;
+        
+        for (let floor = 0; floor < building.floors; floor++) {
+          const floorY = building.y + floor * floorHeight;
+          
+          ctx.fillStyle = '#3a3f4a';
+          ctx.fillRect(building.x, floorY, building.width, floorHeight);
+          
+          ctx.strokeStyle = '#6b7280';
+          ctx.lineWidth = wallThickness;
+          ctx.strokeRect(building.x, floorY, building.width, floorHeight);
+          
+          if (floor === building.floors - 1) {
+            ctx.fillStyle = '#525863';
+            ctx.fillRect(building.x + wallThickness, floorY + wallThickness, building.width - wallThickness * 2, wallThickness);
+          }
+          
+          if (floor < building.floors - 1) {
+            ctx.fillStyle = '#525863';
+            ctx.fillRect(building.x + wallThickness, floorY + floorHeight - wallThickness, building.width - wallThickness * 2, wallThickness);
+            
+            const stairX = building.x + building.width - 16;
+            const stairY = floorY + floorHeight / 2 - 8;
+            const stepCount = 4;
+            const stepWidth = 12;
+            const stepHeight = 4;
+            
+            for (let i = 0; i < stepCount; i++) {
+              ctx.fillStyle = '#8b7355';
+              ctx.fillRect(stairX - i * 2, stairY + i * stepHeight, stepWidth, stepHeight);
+              ctx.strokeStyle = '#6b5940';
+              ctx.lineWidth = 1;
+              ctx.strokeRect(stairX - i * 2, stairY + i * stepHeight, stepWidth, stepHeight);
+            }
+          }
+        }
+        
+        const doorWidth = 14;
+        const doorHeight = 20;
         const doorX = building.x + building.width / 2 - doorWidth / 2;
-        const doorY = building.y + building.height - doorHeight - 8;
+        const doorY = building.y + building.height - doorHeight - wallThickness;
         
         ctx.fillStyle = '#2d1810';
         ctx.fillRect(doorX, doorY, doorWidth, doorHeight);
-        ctx.strokeStyle = building.color;
+        ctx.strokeStyle = '#1a0f08';
         ctx.lineWidth = 2;
         ctx.strokeRect(doorX, doorY, doorWidth, doorHeight);
         
         ctx.fillStyle = '#fbbf24';
         ctx.beginPath();
-        ctx.arc(doorX + doorWidth - 4, doorY + doorHeight / 2, 2, 0, Math.PI * 2);
+        ctx.arc(doorX + doorWidth - 3, doorY + doorHeight / 2, 1.5, 0, Math.PI * 2);
         ctx.fill();
-
-        if (building.floors > 1) {
-          const floorHeight = (building.height - 8) / building.floors;
-          for (let floor = 1; floor < building.floors; floor++) {
-            const floorY = building.y + floor * floorHeight;
-            ctx.strokeStyle = building.color;
-            ctx.lineWidth = 1;
-            ctx.globalAlpha = 0.5;
-            ctx.beginPath();
-            ctx.setLineDash([4, 4]);
-            ctx.moveTo(building.x + 4, floorY);
-            ctx.lineTo(building.x + building.width - 4, floorY);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.globalAlpha = 1;
-          }
-          
-          const stairWidth = 10;
-          const stairX = building.x + 6;
-          const stairStartY = building.y + building.height - floorHeight - 8;
-          const stairEndY = building.y + building.height - 14;
-          
-          ctx.strokeStyle = building.color;
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(stairX, stairEndY);
-          ctx.lineTo(stairX, stairStartY);
-          ctx.lineTo(stairX + stairWidth, stairStartY);
-          ctx.stroke();
-          
-          const steps = 3;
-          for (let i = 0; i <= steps; i++) {
-            const stepY = stairStartY + i * ((stairEndY - stairStartY) / steps);
-            ctx.beginPath();
-            ctx.moveTo(stairX, stepY);
-            ctx.lineTo(stairX + stairWidth - (i * 2), stepY);
-            ctx.stroke();
-          }
-        }
+        
+        ctx.strokeStyle = '#1a0f08';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(doorX + doorWidth / 2, doorY);
+        ctx.lineTo(doorX + doorWidth / 2, doorY + doorHeight);
+        ctx.stroke();
       });
 
       npcs.forEach(npc => {
