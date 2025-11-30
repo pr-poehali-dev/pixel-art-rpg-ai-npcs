@@ -58,18 +58,21 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      keys.current[e.key.toLowerCase()] = true;
+      const key = e.key.toLowerCase();
+      keys.current[key] = true;
+      console.log('Key down:', key, keys.current);
     };
     const handleKeyUp = (e: KeyboardEvent) => {
-      keys.current[e.key.toLowerCase()] = false;
+      const key = e.key.toLowerCase();
+      keys.current[key] = false;
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
 
@@ -109,11 +112,9 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
       ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
 
       buildings.forEach(building => {
-        ctx.fillStyle = building.color;
-        ctx.fillRect(building.x, building.y, building.width, building.height);
-        
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
+        ctx.fillStyle = '#1e293b';
+        ctx.strokeStyle = building.color;
+        ctx.lineWidth = 4;
         ctx.strokeRect(building.x, building.y, building.width, building.height);
 
         const windowSize = 8;
@@ -123,13 +124,24 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
             const windowX = building.x + windowPadding + i * windowPadding;
             const windowY = building.y + 15 + floor * 30;
             const lightOn = isDaytime ? Math.random() > 0.7 : Math.random() > 0.3;
-            ctx.fillStyle = lightOn ? '#fbbf24' : '#1e293b';
+            ctx.fillStyle = lightOn ? '#fbbf24' : '#4a5568';
             ctx.fillRect(windowX, windowY, windowSize, windowSize);
+            ctx.strokeStyle = building.color;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(windowX, windowY, windowSize, windowSize);
           }
         }
 
         ctx.fillStyle = '#8b4513';
-        ctx.fillRect(building.x + building.width / 2 - 10, building.y + building.height - 25, 20, 25);
+        ctx.fillRect(building.x + building.width / 2 - 12, building.y + building.height - 30, 24, 30);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(building.x + building.width / 2 - 12, building.y + building.height - 30, 24, 30);
+        
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(building.x + building.width / 2 + 4, building.y + building.height - 15, 2, 0, Math.PI * 2);
+        ctx.fill();
       });
 
       npcs.forEach(npc => {
@@ -205,18 +217,20 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
   return (
     <canvas
       ref={canvasRef}
-      width={800}
-      height={600}
+      width={1000}
+      height={650}
       onClick={handleCanvasClick}
+      tabIndex={0}
       className="pixel-border"
       style={{
         position: 'absolute',
-        top: '48%',
+        top: '58%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
         border: '4px solid #9b87f5',
         boxShadow: '0 0 20px rgba(155, 135, 245, 0.5)',
-        cursor: 'crosshair'
+        cursor: 'crosshair',
+        outline: 'none'
       }}
     />
   );
