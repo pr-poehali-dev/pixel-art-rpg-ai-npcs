@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,4 +100,14 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.pixel-border {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+* {
+  box-sizing: border-box;
 }
