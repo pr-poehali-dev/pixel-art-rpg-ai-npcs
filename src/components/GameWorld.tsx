@@ -88,10 +88,10 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
       let newX = playerPosition.x;
       let newY = playerPosition.y;
 
-      if (keys.current['arrowup'] || keys.current['w']) newY -= speed;
-      if (keys.current['arrowdown'] || keys.current['s']) newY += speed;
-      if (keys.current['arrowleft'] || keys.current['a']) newX -= speed;
-      if (keys.current['arrowright'] || keys.current['d']) newX += speed;
+      if (keys.current['arrowup'] || keys.current['w'] || keys.current['ц']) newY -= speed;
+      if (keys.current['arrowdown'] || keys.current['s'] || keys.current['ы']) newY += speed;
+      if (keys.current['arrowleft'] || keys.current['a'] || keys.current['ф']) newX -= speed;
+      if (keys.current['arrowright'] || keys.current['d'] || keys.current['в']) newX += speed;
 
       newX = Math.max(20, Math.min(canvas.width - 20, newX));
       newY = Math.max(20, Math.min(canvas.height - 20, newY));
@@ -112,36 +112,59 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
       ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
 
       buildings.forEach(building => {
-        ctx.fillStyle = '#1e293b';
         ctx.strokeStyle = building.color;
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 3;
         ctx.strokeRect(building.x, building.y, building.width, building.height);
 
-        const windowSize = 8;
-        const windowPadding = 12;
-        for (let floor = 0; floor < building.floors; floor++) {
-          for (let i = 0; i < Math.floor(building.width / windowPadding) - 1; i++) {
-            const windowX = building.x + windowPadding + i * windowPadding;
-            const windowY = building.y + 15 + floor * 30;
-            const lightOn = isDaytime ? Math.random() > 0.7 : Math.random() > 0.3;
-            ctx.fillStyle = lightOn ? '#fbbf24' : '#4a5568';
-            ctx.fillRect(windowX, windowY, windowSize, windowSize);
+        const doorWidth = 16;
+        const doorHeight = 24;
+        const doorX = building.x + building.width / 2 - doorWidth / 2;
+        const doorY = building.y + building.height - doorHeight;
+        
+        ctx.fillStyle = '#2d1810';
+        ctx.fillRect(doorX, doorY, doorWidth, doorHeight);
+        ctx.strokeStyle = building.color;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(doorX, doorY, doorWidth, doorHeight);
+        
+        ctx.fillStyle = building.color;
+        ctx.fillRect(doorX + doorWidth - 4, doorY + doorHeight / 2 - 1, 2, 2);
+
+        if (building.floors > 1) {
+          const floorHeight = building.height / building.floors;
+          for (let floor = 1; floor < building.floors; floor++) {
+            const floorY = building.y + floor * floorHeight;
             ctx.strokeStyle = building.color;
             ctx.lineWidth = 2;
-            ctx.strokeRect(windowX, windowY, windowSize, windowSize);
+            ctx.beginPath();
+            ctx.setLineDash([4, 4]);
+            ctx.moveTo(building.x, floorY);
+            ctx.lineTo(building.x + building.width, floorY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+          
+          const stairWidth = 12;
+          const stairX = building.x + 8;
+          const stairStartY = building.y + building.height - floorHeight + 10;
+          const stairEndY = building.y + building.height - 10;
+          
+          ctx.strokeStyle = building.color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(stairX, stairEndY);
+          ctx.lineTo(stairX, stairStartY);
+          ctx.lineTo(stairX + stairWidth, stairStartY);
+          ctx.stroke();
+          
+          for (let i = 0; i < 4; i++) {
+            const stepY = stairStartY + i * 6;
+            ctx.beginPath();
+            ctx.moveTo(stairX, stepY);
+            ctx.lineTo(stairX + stairWidth, stepY);
+            ctx.stroke();
           }
         }
-
-        ctx.fillStyle = '#8b4513';
-        ctx.fillRect(building.x + building.width / 2 - 12, building.y + building.height - 30, 24, 30);
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(building.x + building.width / 2 - 12, building.y + building.height - 30, 24, 30);
-        
-        ctx.fillStyle = '#fbbf24';
-        ctx.beginPath();
-        ctx.arc(building.x + building.width / 2 + 4, building.y + building.height - 15, 2, 0, Math.PI * 2);
-        ctx.fill();
       });
 
       npcs.forEach(npc => {
