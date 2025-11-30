@@ -58,10 +58,10 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      keys.current[e.key] = true;
+      keys.current[e.key.toLowerCase()] = true;
     };
     const handleKeyUp = (e: KeyboardEvent) => {
-      keys.current[e.key] = false;
+      keys.current[e.key.toLowerCase()] = false;
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -85,10 +85,10 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
       let newX = playerPosition.x;
       let newY = playerPosition.y;
 
-      if (keys.current['ArrowUp'] || keys.current['w']) newY -= speed;
-      if (keys.current['ArrowDown'] || keys.current['s']) newY += speed;
-      if (keys.current['ArrowLeft'] || keys.current['a']) newX -= speed;
-      if (keys.current['ArrowRight'] || keys.current['d']) newX += speed;
+      if (keys.current['arrowup'] || keys.current['w']) newY -= speed;
+      if (keys.current['arrowdown'] || keys.current['s']) newY += speed;
+      if (keys.current['arrowleft'] || keys.current['a']) newX -= speed;
+      if (keys.current['arrowright'] || keys.current['d']) newX += speed;
 
       newX = Math.max(20, Math.min(canvas.width - 20, newX));
       newY = Math.max(20, Math.min(canvas.height - 20, newY));
@@ -211,7 +211,7 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
       className="pixel-border"
       style={{
         position: 'absolute',
-        top: '50%',
+        top: '48%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
         border: '4px solid #9b87f5',
