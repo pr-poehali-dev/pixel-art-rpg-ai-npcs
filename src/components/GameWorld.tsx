@@ -58,13 +58,11 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const key = e.key.toLowerCase();
-      keys.current[key] = true;
-      console.log('Key down:', key, keys.current);
+      e.preventDefault();
+      keys.current[e.code] = true;
     };
     const handleKeyUp = (e: KeyboardEvent) => {
-      const key = e.key.toLowerCase();
-      keys.current[key] = false;
+      keys.current[e.code] = false;
     };
 
     document.addEventListener('keydown', handleKeyDown);
@@ -88,10 +86,10 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
       let newX = playerPosition.x;
       let newY = playerPosition.y;
 
-      if (keys.current['arrowup'] || keys.current['w'] || keys.current['ц']) newY -= speed;
-      if (keys.current['arrowdown'] || keys.current['s'] || keys.current['ы']) newY += speed;
-      if (keys.current['arrowleft'] || keys.current['a'] || keys.current['ф']) newX -= speed;
-      if (keys.current['arrowright'] || keys.current['d'] || keys.current['в']) newX += speed;
+      if (keys.current['ArrowUp'] || keys.current['KeyW']) newY -= speed;
+      if (keys.current['ArrowDown'] || keys.current['KeyS']) newY += speed;
+      if (keys.current['ArrowLeft'] || keys.current['KeyA']) newX -= speed;
+      if (keys.current['ArrowRight'] || keys.current['KeyD']) newX += speed;
 
       newX = Math.max(20, Math.min(canvas.width - 20, newX));
       newY = Math.max(20, Math.min(canvas.height - 20, newY));
@@ -112,14 +110,36 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
       ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
 
       buildings.forEach(building => {
+        ctx.fillStyle = building.color;
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(building.x, building.y, building.width, building.height);
+        ctx.globalAlpha = 1;
+
         ctx.strokeStyle = building.color;
         ctx.lineWidth = 3;
         ctx.strokeRect(building.x, building.y, building.width, building.height);
 
+        ctx.fillStyle = '#1a1f2c';
+        ctx.fillRect(building.x, building.y + building.height - 8, building.width, 8);
+        ctx.strokeStyle = building.color;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(building.x, building.y + building.height - 8, building.width, 8);
+
+        ctx.fillStyle = building.color;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(building.x - 6, building.y);
+        ctx.lineTo(building.x + building.width / 2, building.y - 12);
+        ctx.lineTo(building.x + building.width + 6, building.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.stroke();
+
         const doorWidth = 16;
         const doorHeight = 24;
         const doorX = building.x + building.width / 2 - doorWidth / 2;
-        const doorY = building.y + building.height - doorHeight;
+        const doorY = building.y + building.height - doorHeight - 8;
         
         ctx.fillStyle = '#2d1810';
         ctx.fillRect(doorX, doorY, doorWidth, doorHeight);
@@ -127,27 +147,31 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
         ctx.lineWidth = 2;
         ctx.strokeRect(doorX, doorY, doorWidth, doorHeight);
         
-        ctx.fillStyle = building.color;
-        ctx.fillRect(doorX + doorWidth - 4, doorY + doorHeight / 2 - 1, 2, 2);
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(doorX + doorWidth - 4, doorY + doorHeight / 2, 2, 0, Math.PI * 2);
+        ctx.fill();
 
         if (building.floors > 1) {
-          const floorHeight = building.height / building.floors;
+          const floorHeight = (building.height - 8) / building.floors;
           for (let floor = 1; floor < building.floors; floor++) {
             const floorY = building.y + floor * floorHeight;
             ctx.strokeStyle = building.color;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.5;
             ctx.beginPath();
             ctx.setLineDash([4, 4]);
-            ctx.moveTo(building.x, floorY);
-            ctx.lineTo(building.x + building.width, floorY);
+            ctx.moveTo(building.x + 4, floorY);
+            ctx.lineTo(building.x + building.width - 4, floorY);
             ctx.stroke();
             ctx.setLineDash([]);
+            ctx.globalAlpha = 1;
           }
           
-          const stairWidth = 12;
-          const stairX = building.x + 8;
-          const stairStartY = building.y + building.height - floorHeight + 10;
-          const stairEndY = building.y + building.height - 10;
+          const stairWidth = 10;
+          const stairX = building.x + 6;
+          const stairStartY = building.y + building.height - floorHeight - 8;
+          const stairEndY = building.y + building.height - 14;
           
           ctx.strokeStyle = building.color;
           ctx.lineWidth = 2;
@@ -157,11 +181,12 @@ const GameWorld = ({ gameTime, playerPosition, setPlayerPosition, onNPCInteract 
           ctx.lineTo(stairX + stairWidth, stairStartY);
           ctx.stroke();
           
-          for (let i = 0; i < 4; i++) {
-            const stepY = stairStartY + i * 6;
+          const steps = 3;
+          for (let i = 0; i <= steps; i++) {
+            const stepY = stairStartY + i * ((stairEndY - stairStartY) / steps);
             ctx.beginPath();
             ctx.moveTo(stairX, stepY);
-            ctx.lineTo(stairX + stairWidth, stepY);
+            ctx.lineTo(stairX + stairWidth - (i * 2), stepY);
             ctx.stroke();
           }
         }
