@@ -14,6 +14,17 @@ const DialogSystem = ({ npc, onClose, playerPosition }: DialogSystemProps) => {
   const [npcMood, setNpcMood] = useState(npc.relationshipToPlayer || 0);
 
   useEffect(() => {
+    const preventGameKeys = (e: KeyboardEvent) => {
+      if (['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.stopPropagation();
+      }
+    };
+    
+    window.addEventListener('keydown', preventGameKeys, true);
+    return () => window.removeEventListener('keydown', preventGameKeys, true);
+  }, []);
+
+  useEffect(() => {
     const greetings = {
       friendly: 'Привет! Как дела?',
       merchant: 'Здравствуй, хочешь что-то купить?',
